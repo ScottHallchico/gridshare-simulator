@@ -73,12 +73,52 @@ class MicrogridPreprocessor:
         print("⚠️ No UCI file provided. Generating synthetic demand data...")
         dates = pd.date_range(start="2008-01-01", end="2008-01-10 23:00:00", freq="H")
         df = pd.DataFrame(index=dates)
-        # Synthetic daily demand curve
+
         hour = df.index.hour
-        base_load = 0.5
-        peak_load = (hour > 17) & (hour < 22)
-        df['demand_kwh'] = base_load + (peak_load * 1.5) + np.random.normal(0, 0.1, len(df))
+        dayofweek = df.index.dayofweek  # 0=Mon, ..., 5=Sat, 6=Sun
+        is_weekend = (dayofweek >= 5).astype(int)
+
+        # ===============================
+        # Weekday Demand Pattern
+        # ===============================
+        # Early morning spike (6-9 AM)
+        morning_peak = np.where((hour >= 6) & (hour <= 9), 0.5, 0)
+
+        # Evening peak (5 PM – 10 PM)
+        evening_peak = np.where((hour >= 17) & (hour <= 22), 1.5, 0)
+
+        # Base weekday load
+        weekday_load = 0.4 + morning_peak + evening_peak
+
+        # ===============================
+        # Weekend Demand Pattern
+        # ===============================
+        # People wake up later → later morning peak (9–12)
+        wk_morning_peak = np.where((hour >= 9) & (hour <= 12), 0.6, 0)
+
+        # Slightly higher daytime usage (home all day)
+        wk_day_usage = np.where((hour >= 12) & (hour <= 16), 0.3, 0)
+
+        # Slightly higher evening usage
+        wk_evening_peak = np.where((hour >= 18) & (hour <= 23), 1.7, 0)
+
+        # Base weekend load
+        weekend_load = 0.5 + wk_morning_peak + wk_day_usage + wk_evening_peak
+
+        # ===============================
+        # Combine weekday + weekend
+        # ===============================
+        df['demand_kwh'] = (
+            (1 - is_weekend) * weekday_load +
+            (is_weekend) * weekend_load
+        )
+
+        # Add Gaussian noise for randomness
+        df['demand_kwh'] += np.random.normal(0, 0.1, len(df))
+
+        # Ensure demand never drops below 0.1
         df['demand_kwh'] = df['demand_kwh'].clip(lower=0.1)
+
         return df
 
     # ==========================================
@@ -117,20 +157,7 @@ class MicrogridPreprocessor:
 
         print("Step 2: Simulating Physics-Based Solar Generation...")
         df = self.calculate_solar_physics(df)
-        # How many zeros overall
-        print("Total rows:", len(df))
-        print("Zero generation count:", (df['generation_kwh'] == 0).sum())
-
-        # Zero counts by hour of day (helps see if concentrated at night)
-        zero_by_hour = df['generation_kwh'].eq(0).groupby(df.index.hour).sum()
-        print("Zero generation by hour (0-23):")
-        print(zero_by_hour)
-
-        # Inspect some daytime zero rows (e.g., between 8 and 17)
-        daytime_zeros = df[(df.index.hour.between(6,18)) & (df['generation_kwh'] == 0)]
-        print("Daytime zero sample (first 10):")
-        print(daytime_zeros.head(10))
-
+        
         print("Step 3: Generating Temperature...")
         # FIX: Align seasonal peak to April/May (Bengaluru Summer)
         # Bengaluru Peak heat is around April (Day 110)
