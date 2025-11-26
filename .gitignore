@@ -13,4 +13,4 @@ pycache/
 .env
 .DS_Store
 Thumbs.db
-.pkl
+*.pkl
