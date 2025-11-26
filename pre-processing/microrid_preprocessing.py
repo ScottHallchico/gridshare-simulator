@@ -105,7 +105,7 @@ class MicrogridPreprocessor:
             
             # Filter for a clean 1-year period (e.g., 2008)
             # You can expand this range to '2007-01-01':'2010-12-31' for more data
-            df = df.loc['2006-12-16':'2008-11-26']
+            df = df.loc['2006-12-16':'2010-11-26']
 
             # 🛠️ MODERNIZATION STEP
             # Multiply by 1.2 to simulate 2025 usage levels (approx +20% vs 2008)
@@ -117,6 +117,19 @@ class MicrogridPreprocessor:
 
         print("Step 2: Simulating Physics-Based Solar Generation...")
         df = self.calculate_solar_physics(df)
+        # How many zeros overall
+        print("Total rows:", len(df))
+        print("Zero generation count:", (df['generation_kwh'] == 0).sum())
+
+        # Zero counts by hour of day (helps see if concentrated at night)
+        zero_by_hour = df['generation_kwh'].eq(0).groupby(df.index.hour).sum()
+        print("Zero generation by hour (0-23):")
+        print(zero_by_hour)
+
+        # Inspect some daytime zero rows (e.g., between 8 and 17)
+        daytime_zeros = df[(df.index.hour.between(6,18)) & (df['generation_kwh'] == 0)]
+        print("Daytime zero sample (first 10):")
+        print(daytime_zeros.head(10))
 
         print("Step 3: Generating Temperature...")
         # FIX: Align seasonal peak to April/May (Bengaluru Summer)

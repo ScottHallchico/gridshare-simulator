@@ -254,17 +254,17 @@ class EnergyForecaster:
                 features.extend(['temperature', 'temp_hour_interaction'])
             
         elif model_type == "solar":
-            features = ['hour', 'month', 'hour_sin', 'hour_cos', 'is_night']
-            
-            # Add lag features
-            for lag in self.config['solar_lags']:
-                features.append(f'generation_kwh_lag_{lag}')
-            
-            # Add weather if available
-            weather_cols = ['irradiance', 'cloud_cover', 'temperature']
-            for col in weather_cols:
-                if col in self.training_data.columns:
-                    features.append(col)
+            # Only time-based features
+            features = [
+                'hour', 'month', 'hour_sin', 'hour_cos',
+                'dayofweek', 'is_weekend', 'is_night'
+            ]
+
+    # REMOVE generation_lag_1 (causes leakage)
+    # REMOVE irradiance (direct formula defines generation)
+    # REMOVE cloud_cover (synthetic & correlated)
+    # KEEP temperature optionally, but it's weak for solar.
+
         
         return features
     
