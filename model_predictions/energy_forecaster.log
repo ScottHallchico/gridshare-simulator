@@ -139,3 +139,167 @@ STEP 2: FEATURE ENGINEERING
 ============================================================
 2025-11-26 02:43:38,218 - __main__ - INFO - 🎉 TRAINING COMPLETED SUCCESSFULLY!
 2025-11-26 02:43:38,218 - __main__ - INFO - ============================================================
+2026-01-01 00:34:11,485 - __main__ - ERROR - ⚠️/home/wangchen/Documents/gridshare/data/processed_microgrid_data.csv not found!
+2026-01-01 00:36:40,871 - __main__ - ERROR - ⚠️/home/wangchen/Documents/gridshare/model_predictions/processed_microgrid_data.csv not found!
+2026-01-01 00:37:02,065 - __main__ - INFO - ============================================================
+2026-01-01 00:37:02,066 - __main__ - INFO - STEP 1: LOADING AND VALIDATING DATA
+2026-01-01 00:37:02,066 - __main__ - INFO - ============================================================
+2026-01-01 00:37:02,066 - __main__ - ERROR - 
+❌ Training failed: Data file not found: processed_microgrid_data.csv
+Traceback (most recent call last):
+  File "/home/wangchen/Documents/gridshare/model_predictions/forecasting_engine.py", line 514, in run
+    df = self.load_and_validate_data()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangchen/Documents/gridshare/model_predictions/forecasting_engine.py", line 153, in load_and_validate_data
+    raise FileNotFoundError(f"Data file not found: {self.data_path}")
+FileNotFoundError: Data file not found: processed_microgrid_data.csv
+2026-01-01 00:37:37,324 - __main__ - INFO - ============================================================
+2026-01-01 00:37:37,324 - __main__ - INFO - STEP 1: LOADING AND VALIDATING DATA
+2026-01-01 00:37:37,324 - __main__ - INFO - ============================================================
+2026-01-01 00:37:37,324 - __main__ - ERROR - 
+❌ Training failed: Data file not found: processed_microgrid_data.csv
+Traceback (most recent call last):
+  File "/home/wangchen/Documents/gridshare/model_predictions/forecasting_engine.py", line 514, in run
+    df = self.load_and_validate_data()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/wangchen/Documents/gridshare/model_predictions/forecasting_engine.py", line 153, in load_and_validate_data
+    raise FileNotFoundError(f"Data file not found: {self.data_path}")
+FileNotFoundError: Data file not found: processed_microgrid_data.csv
+2026-01-01 00:47:29,576 - __main__ - INFO - ============================================================
+2026-01-01 00:47:29,576 - __main__ - INFO - STEP 1: LOADING AND VALIDATING DATA
+2026-01-01 00:47:29,576 - __main__ - INFO - ============================================================
+2026-01-01 00:47:29,617 - __main__ - INFO - ✓ Loaded 34588 records from ../processed_microgrid_data.csv
+2026-01-01 00:47:29,619 - __main__ - INFO -   Date range: 2006-12-16 18:00:00 to 2010-11-26 21:00:00
+2026-01-01 00:47:29,624 - __main__ - INFO -   demand_kwh: 812 outliers (2.35%)
+2026-01-01 00:47:29,625 - __main__ - INFO -   generation_kwh: 17199 outliers (49.73%)
+2026-01-01 00:47:29,625 - __main__ - WARNING -   ⚠️ High outlier percentage in generation_kwh
+2026-01-01 00:47:29,625 - __main__ - INFO - 
+STEP 2: FEATURE ENGINEERING
+2026-01-01 00:47:29,625 - __main__ - INFO - ------------------------------------------------------------
+2026-01-01 00:47:29,630 - __main__ - INFO - ✓ Created temporal features
+2026-01-01 00:47:29,646 - __main__ - INFO - ✓ Created demand lag and rolling features
+2026-01-01 00:47:29,650 - __main__ - INFO - ✓ Created solar lag features
+2026-01-01 00:47:29,656 - __main__ - INFO - ✓ Created interaction features
+2026-01-01 00:47:29,659 - __main__ - INFO - ✓ Dropped 168 rows with NaN from feature engineering
+2026-01-01 00:47:29,660 - __main__ - INFO - ✓ No temporal overlap: Train ends 2010-02-13 01:00:00, Test starts 2010-02-13 02:00:00
+2026-01-01 00:47:29,660 - __main__ - INFO - 
+✓ Train: 27536 samples (2006-12-23 18:00:00 to 2010-02-13 01:00:00)
+2026-01-01 00:47:29,660 - __main__ - INFO - ✓ Test:  6884 samples (2010-02-13 02:00:00 to 2010-11-26 21:00:00)
+2026-01-01 00:47:29,660 - __main__ - INFO - 
+============================================================
+2026-01-01 00:47:29,660 - __main__ - INFO - TRAINING DEMAND MODEL
+2026-01-01 00:47:29,660 - __main__ - INFO - ============================================================
+2026-01-01 00:47:29,663 - __main__ - INFO - 
+📋 Feature Set (19 features):
+2026-01-01 00:47:29,663 - __main__ - INFO -    1. hour
+2026-01-01 00:47:29,663 - __main__ - INFO -    2. dayofweek
+2026-01-01 00:47:29,663 - __main__ - INFO -    3. is_weekend
+2026-01-01 00:47:29,663 - __main__ - INFO -    4. month
+2026-01-01 00:47:29,663 - __main__ - INFO -    5. hour_sin
+2026-01-01 00:47:29,663 - __main__ - INFO -    6. hour_cos
+2026-01-01 00:47:29,663 - __main__ - INFO -    7. is_night
+2026-01-01 00:47:29,663 - __main__ - INFO -    8. demand_kwh_lag_1
+2026-01-01 00:47:29,663 - __main__ - INFO -    9. demand_kwh_lag_2
+2026-01-01 00:47:29,663 - __main__ - INFO -    10. demand_kwh_lag_24
+2026-01-01 00:47:29,663 - __main__ - INFO -    11. demand_kwh_lag_168
+2026-01-01 00:47:29,663 - __main__ - INFO -    12. demand_kwh_roll_mean_12h
+2026-01-01 00:47:29,663 - __main__ - INFO -    13. demand_kwh_roll_std_12h
+2026-01-01 00:47:29,663 - __main__ - INFO -    14. demand_kwh_roll_mean_24h
+2026-01-01 00:47:29,663 - __main__ - INFO -    15. demand_kwh_roll_std_24h
+2026-01-01 00:47:29,663 - __main__ - INFO -    16. demand_kwh_roll_mean_168h
+2026-01-01 00:47:29,663 - __main__ - INFO -    17. demand_kwh_roll_std_168h
+2026-01-01 00:47:29,663 - __main__ - INFO -    18. temperature
+2026-01-01 00:47:29,663 - __main__ - INFO -    19. temp_hour_interaction
+2026-01-01 00:47:29,663 - __main__ - INFO - 
+  🔍 Tuning hyperparameters for DEMAND...
+2026-01-01 00:47:37,436 - __main__ - INFO -   ✓ Best CV MAE: 0.4203
+2026-01-01 00:47:37,436 - __main__ - INFO -   ✓ Best params: {'subsample': 1.0, 'n_estimators': 1000, 'min_child_weight': 1, 'max_depth': 6, 'learning_rate': 0.03, 'gamma': 0.2, 'colsample_bytree': 0.8}
+2026-01-01 00:47:37,436 - __main__ - INFO - 
+============================================================
+2026-01-01 00:47:37,436 - __main__ - INFO - EVALUATION: DEMAND MODEL
+2026-01-01 00:47:37,436 - __main__ - INFO - ============================================================
+2026-01-01 00:47:37,532 - __main__ - INFO - 
+📊 Training Set:
+2026-01-01 00:47:37,532 - __main__ - INFO -    MAE:  0.3315 kWh
+2026-01-01 00:47:37,532 - __main__ - INFO -    RMSE: 0.4765 kWh
+2026-01-01 00:47:37,532 - __main__ - INFO - 
+📊 Test Set:
+2026-01-01 00:47:37,532 - __main__ - INFO -    MAE:  0.3641 kWh
+2026-01-01 00:47:37,532 - __main__ - INFO -    RMSE: 0.5172 kWh
+2026-01-01 00:47:37,532 - __main__ - INFO -    MAPE: 6126357244.49%
+2026-01-01 00:47:37,532 - __main__ - INFO - 
+📈 Baseline Comparison:
+2026-01-01 00:47:37,532 - __main__ - INFO -    Naive forecast MAE:    0.8058
+2026-01-01 00:47:37,532 - __main__ - INFO -    Seasonal avg MAE:      0.6318
+2026-01-01 00:47:37,532 - __main__ - INFO - 
+✨ Model Improvement:
+2026-01-01 00:47:37,532 - __main__ - INFO -    vs Naive:    +54.8%
+2026-01-01 00:47:37,532 - __main__ - INFO -    vs Seasonal: +42.4%
+2026-01-01 00:47:38,263 - __main__ - INFO -   ✓ Forecast visualization saved to forecast_demand.png
+2026-01-01 00:47:38,670 - __main__ - INFO -   ✓ Feature importance saved to importance_demand.png
+2026-01-01 00:47:38,670 - __main__ - INFO - 
+  Top 5 Features for Demand:
+2026-01-01 00:47:38,670 - __main__ - INFO -     1. demand_kwh_lag_1: 0.3716
+2026-01-01 00:47:38,670 - __main__ - INFO -     2. demand_kwh_lag_168: 0.0738
+2026-01-01 00:47:38,670 - __main__ - INFO -     3. is_night: 0.0727
+2026-01-01 00:47:38,670 - __main__ - INFO -     4. hour_cos: 0.0683
+2026-01-01 00:47:38,670 - __main__ - INFO -     5. demand_kwh_roll_std_12h: 0.0610
+2026-01-01 00:47:38,670 - __main__ - INFO - 
+============================================================
+2026-01-01 00:47:38,670 - __main__ - INFO - TRAINING SOLAR MODEL
+2026-01-01 00:47:38,670 - __main__ - INFO - ============================================================
+2026-01-01 00:47:38,671 - __main__ - INFO - 
+📋 Feature Set (7 features):
+2026-01-01 00:47:38,671 - __main__ - INFO -    1. hour
+2026-01-01 00:47:38,671 - __main__ - INFO -    2. month
+2026-01-01 00:47:38,671 - __main__ - INFO -    3. hour_sin
+2026-01-01 00:47:38,671 - __main__ - INFO -    4. hour_cos
+2026-01-01 00:47:38,671 - __main__ - INFO -    5. dayofweek
+2026-01-01 00:47:38,671 - __main__ - INFO -    6. is_weekend
+2026-01-01 00:47:38,671 - __main__ - INFO -    7. is_night
+2026-01-01 00:47:38,671 - __main__ - INFO - 
+  🔍 Tuning hyperparameters for SOLAR...
+2026-01-01 00:47:40,296 - __main__ - INFO -   ✓ Best CV MAE: 0.1575
+2026-01-01 00:47:40,296 - __main__ - INFO -   ✓ Best params: {'subsample': 0.9, 'n_estimators': 500, 'min_child_weight': 3, 'max_depth': 6, 'learning_rate': 0.05, 'gamma': 0.2, 'colsample_bytree': 0.9}
+2026-01-01 00:47:40,296 - __main__ - INFO - 
+============================================================
+2026-01-01 00:47:40,296 - __main__ - INFO - EVALUATION: SOLAR MODEL
+2026-01-01 00:47:40,296 - __main__ - INFO - ============================================================
+2026-01-01 00:47:40,319 - __main__ - INFO - 
+📊 Training Set:
+2026-01-01 00:47:40,319 - __main__ - INFO -    MAE:  0.1557 kWh
+2026-01-01 00:47:40,319 - __main__ - INFO -    RMSE: 0.2980 kWh
+2026-01-01 00:47:40,320 - __main__ - INFO - 
+📊 Test Set:
+2026-01-01 00:47:40,320 - __main__ - INFO -    MAE:  0.1631 kWh
+2026-01-01 00:47:40,320 - __main__ - INFO -    RMSE: 0.3069 kWh
+2026-01-01 00:47:40,320 - __main__ - INFO -    MAPE: 1014850885.35%
+2026-01-01 00:47:40,320 - __main__ - INFO - 
+📈 Baseline Comparison:
+2026-01-01 00:47:40,320 - __main__ - INFO -    Naive forecast MAE:    0.8940
+2026-01-01 00:47:40,320 - __main__ - INFO -    Seasonal avg MAE:      0.1847
+2026-01-01 00:47:40,320 - __main__ - INFO - 
+✨ Model Improvement:
+2026-01-01 00:47:40,320 - __main__ - INFO -    vs Naive:    +81.8%
+2026-01-01 00:47:40,320 - __main__ - INFO -    vs Seasonal: +11.7%
+2026-01-01 00:47:40,883 - __main__ - INFO -   ✓ Forecast visualization saved to forecast_solar.png
+2026-01-01 00:47:41,224 - __main__ - INFO -   ✓ Feature importance saved to importance_solar.png
+2026-01-01 00:47:41,224 - __main__ - INFO - 
+  Top 5 Features for Solar:
+2026-01-01 00:47:41,224 - __main__ - INFO -     1. hour_cos: 0.4826
+2026-01-01 00:47:41,224 - __main__ - INFO -     2. is_night: 0.4639
+2026-01-01 00:47:41,224 - __main__ - INFO -     3. hour: 0.0484
+2026-01-01 00:47:41,224 - __main__ - INFO -     4. month: 0.0034
+2026-01-01 00:47:41,224 - __main__ - INFO -     5. hour_sin: 0.0006
+2026-01-01 00:47:41,224 - __main__ - INFO - 
+============================================================
+2026-01-01 00:47:41,224 - __main__ - INFO - SAVING MODELS
+2026-01-01 00:47:41,224 - __main__ - INFO - ============================================================
+2026-01-01 00:47:41,229 - __main__ - INFO - ✓ Demand model saved: demand_model_20260101_004741.pkl
+2026-01-01 00:47:41,232 - __main__ - INFO - ✓ Solar model saved: solar_model_20260101_004741.pkl
+2026-01-01 00:47:41,232 - __main__ - INFO - 
+✅ All models saved successfully!
+2026-01-01 00:47:41,232 - __main__ - INFO - 
+============================================================
+2026-01-01 00:47:41,232 - __main__ - INFO - 🎉 TRAINING COMPLETED SUCCESSFULLY!
+2026-01-01 00:47:41,232 - __main__ - INFO - ============================================================

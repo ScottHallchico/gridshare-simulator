@@ -14,3 +14,4 @@ pycache/
 .DS_Store
 Thumbs.db
 *.pkl
+*zip

@@ -10,6 +10,10 @@ import logging
 from typing import Dict, Tuple, Optional
 from datetime import datetime
 import warnings
+
+print("🔥 forecasting_engine.py is executing")
+print("RUNNING FILE:", __file__)
+
 warnings.filterwarnings('ignore')
 
 # Configure logging
@@ -117,29 +121,36 @@ class FeatureEngineer:
         return df
 
 
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 class EnergyForecaster:
     """Production-grade energy forecasting system."""
-    
-    def __init__(self, data_path: str = "processed_microgrid_data.csv", 
-                 config: Optional[Dict] = None):
-        self.data_path = data_path
+
+    def __init__(self, data_path=None, config=None):
+        print("DEBUG init data_path:", data_path)
+        print("DEBUG resolved path:", os.path.join(BASE_DIR, "..", "processed_microgrid_data.csv"))
+        self.data_path = data_path or os.path.join(
+            BASE_DIR, "..", "processed_microgrid_data.csv"
+        )
+
         self.models = {}
         self.scalers = {}
         self.feature_names = {}
         self.training_metrics = {}
-        
+
         # Default configuration
         self.config = config or {
             'split_ratio': 0.8,
             'cv_splits': 3,
             'random_state': 42,
             'optimize': True,
-            'n_iter': 15,  # Increased from 10
+            'n_iter': 15,
             'demand_lags': [1, 2, 24],
             'solar_lags': [1],
-            'rolling_windows': [12, 24, 168]  # 12h, 24h, 1 week
+            'rolling_windows': [12, 24, 168]
         }
-        
         self.validator = DataValidator()
         self.feature_engineer = FeatureEngineer()
         
@@ -484,16 +495,21 @@ class EnergyForecaster:
         logger.info(f"  ✓ Forecast visualization saved to {filename}")
     
     def save_models(self):
-        """Save models with metadata."""
         logger.info("\n" + "=" * 60)
         logger.info("SAVING MODELS")
         logger.info("=" * 60)
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        
+
+        # forecasting_engine.py already lives in model_predictions/
+        MODEL_DIR = os.path.dirname(os.path.abspath(__file__))
+
         for model_type, model in self.models.items():
-            filename = f"{model_type}_model_{timestamp}.pkl"
-            
+            filename = os.path.join(
+                MODEL_DIR,
+                f"{model_type}_model_{timestamp}.pkl"
+            )
+
             model_package = {
                 'model': model,
                 'feature_names': self.feature_names[model_type],
@@ -501,18 +517,23 @@ class EnergyForecaster:
                 'timestamp': timestamp,
                 'config': self.config
             }
-            
+
             joblib.dump(model_package, filename)
             logger.info(f"✓ {model_type.capitalize()} model saved: {filename}")
-        
+
         logger.info("\n✅ All models saved successfully!")
+
+
     
     def run(self):
         """Main training pipeline."""
+        print("🚀 Entered __main__")
         try:
             # Load and prepare data
             df = self.load_and_validate_data()
             df = self.engineer_features(df)
+            df.to_csv("engineered_microgrid_data.csv")
+
             
             # Store for feature set creation
             self.training_data = df
@@ -584,6 +605,7 @@ class EnergyForecaster:
 
 if __name__ == "__main__":
     # Configuration
+    print("🚀 Entered __main__")
     config = {
         'split_ratio': 0.8,
         'cv_splits': 3,
@@ -594,9 +616,10 @@ if __name__ == "__main__":
         'solar_lags': [1],
         'rolling_windows': [12, 24, 168]
     }
-    
-    if not os.path.exists("processed_microgrid_data.csv"):
-        logger.error("⚠️  'processed_microgrid_data.csv' not found!")
+    DATA_PATH = "/home/wangchen/Documents/gridshare/processed_microgrid_data.csv"
+
+    if not os.path.exists(DATA_PATH):
+        logger.error(f"⚠️{DATA_PATH} not found!")
     else:
         forecaster = EnergyForecaster(config=config)
-        forecaster.run()
+    forecaster.run()

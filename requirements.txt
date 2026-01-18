@@ -1,0 +1,10 @@
+pandas
+numpy
+stable-baselines3
+shimmy
+flask
+flask-cors
+joblib
+scikit-learn
+matplotlib
+gymnasium
