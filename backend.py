@@ -19,7 +19,7 @@ from stable_baselines3 import PPO
 from microgrid_env import MicrogridEnv
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # --- FIX 2: Correct the File Paths ---
 # Since backend.py is in the main folder, we don't need ".."
@@ -66,7 +66,7 @@ prices[(hours >= 21)] = 8.0
 
 @app.route('/simulate', methods=['POST'])
 def run_simulation():
-    print("--- NEW SIMULATION REQUEST RECEIVED ---") # You MUST see this in terminal
+    print("--- SIMULATION REQUEST RECEIVED ---") 
 
     req_data = request.json
     num_houses = int(req_data.get('num_houses', 1))
@@ -74,40 +74,59 @@ def run_simulation():
     
     sim_steps = 48
     
+    # --- FIX 1: LOAD EXTRA DATA (49 hours instead of 48) ---
+    # We slice 49 steps so the env has 'one more step' to peek at without crashing
+    data_len = sim_steps + 1 
+    
+    sim_solar = base_solar[:data_len].copy()
+    sim_demand = base_demand[:data_len].copy()
+    
+    # ---------------------------------------------------------
+    # ### NUCLEAR FIX: MANUALLY DELETE NIGHT SOLAR ###
+    # ---------------------------------------------------------
+    sim_solar[20:24] = 0.0
+    sim_solar[44:49] = 0.0 # Extended to cover the buffer hour
+    sim_solar[0:6] = 0.0
+    sim_solar[24:30] = 0.0
+    
+    print(f"DEBUG: Solar at Hour 22 is NOW FORCE-SET TO: {sim_solar[22]}")
+    # ---------------------------------------------------------
+
     total_grid_load = np.zeros(sim_steps)
     total_solar_gen = np.zeros(sim_steps)
     total_battery_soc = np.zeros(sim_steps)
 
-    # --- THE FORCE FIX ---
-    # We create a local copy of solar and force night to 0.0 right here.
-    # This guarantees the fix runs every time you click the button.
-    sim_solar = base_solar.copy()
-    sim_solar[(hours < 6) | (hours > 20)] = 0.0
-    
-    # DEBUG PROOF: Print Hour 22 Solar to the terminal
-    print(f"DEBUG: Solar at Hour 22 is now exactly: {sim_solar[22]}")
-    # ---------------------
-
     for i in range(num_houses):
         variation = np.random.uniform(0.8, 1.2)
-        house_demand = base_demand * variation
+        house_demand = sim_demand * variation
         
         env = MicrogridEnv(
             demand_values=house_demand,
-            solar_values=sim_solar,  # <--- Use the FIXED solar here
-            price_values=prices,
+            solar_values=sim_solar, # Contains 49 hours
+            price_values=np.resize(prices, data_len), # Resize prices to match
             battery_capacity=battery_size
         )
         obs, _ = env.reset()
         
+        # We still only loop 48 times
         for t in range(sim_steps):
             action, _ = model.predict(obs, deterministic=True)
-            obs, reward, done, _, _ = env.step(action)
+            
+            # --- FIX 2: FLOAT CONVERSION ---
+            action = float(action[0])
+            
+            obs, reward, done, _, _ = env.step([action])
             
             total_battery_soc[t] += (obs[0] * battery_size) 
-            total_solar_gen[t] += sim_solar[t] # <--- Use the FIXED solar here
+            total_solar_gen[t] += sim_solar[t]
             
             current_net = house_demand[t] - sim_solar[t]
+            
+            if action > 0:
+                 current_net -= (action * battery_size) 
+            else:
+                 current_net += (abs(action) * battery_size) 
+
             total_grid_load[t] += max(current_net, 0)
 
     return jsonify({
