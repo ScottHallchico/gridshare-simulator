@@ -57,6 +57,7 @@ base_solar = np.maximum(solar_pkg["model"].predict(features_s), 0.0)
 
 # Pricing Logic
 hours = data.index.hour
+base_solar[(hours < 6) | (hours > 20)] = 0.0
 prices = np.zeros(len(data))
 prices[(hours >= 0) & (hours < 6)] = 4.0
 prices[(hours >= 6) & (hours < 17)] = 8.0
@@ -65,6 +66,8 @@ prices[(hours >= 21)] = 8.0
 
 @app.route('/simulate', methods=['POST'])
 def run_simulation():
+    print("--- NEW SIMULATION REQUEST RECEIVED ---") # You MUST see this in terminal
+
     req_data = request.json
     num_houses = int(req_data.get('num_houses', 1))
     battery_size = float(req_data.get('battery_size', 5.0))
@@ -75,13 +78,23 @@ def run_simulation():
     total_solar_gen = np.zeros(sim_steps)
     total_battery_soc = np.zeros(sim_steps)
 
+    # --- THE FORCE FIX ---
+    # We create a local copy of solar and force night to 0.0 right here.
+    # This guarantees the fix runs every time you click the button.
+    sim_solar = base_solar.copy()
+    sim_solar[(hours < 6) | (hours > 20)] = 0.0
+    
+    # DEBUG PROOF: Print Hour 22 Solar to the terminal
+    print(f"DEBUG: Solar at Hour 22 is now exactly: {sim_solar[22]}")
+    # ---------------------
+
     for i in range(num_houses):
         variation = np.random.uniform(0.8, 1.2)
         house_demand = base_demand * variation
         
         env = MicrogridEnv(
             demand_values=house_demand,
-            solar_values=base_solar,
+            solar_values=sim_solar,  # <--- Use the FIXED solar here
             price_values=prices,
             battery_capacity=battery_size
         )
@@ -92,9 +105,9 @@ def run_simulation():
             obs, reward, done, _, _ = env.step(action)
             
             total_battery_soc[t] += (obs[0] * battery_size) 
-            total_solar_gen[t] += base_solar[t]
+            total_solar_gen[t] += sim_solar[t] # <--- Use the FIXED solar here
             
-            current_net = house_demand[t] - base_solar[t]
+            current_net = house_demand[t] - sim_solar[t]
             total_grid_load[t] += max(current_net, 0)
 
     return jsonify({
